@@ -27,7 +27,7 @@ interface User {
   email: string;
   name: string;
   avatar?: string;
-  provider: 'google' | 'github' | 'local';
+  provider: 'google' | 'github' | 'apple' | 'local';
 }
 
 interface BibleVerse {
@@ -201,12 +201,12 @@ function generateToken(userId: string): string {
  * @param code - The authorization code from the provider
  * @returns A User object
  */
-async function exchangeOAuthCode(provider: 'google' | 'github', code: string): Promise<User> {
+async function exchangeOAuthCode(provider: 'google' | 'github' | 'apple', code: string): Promise<User> {
   // Mock implementation - replace with real OAuth flow in production
   const mockUser: User = {
     id: `user_${Date.now()}`,
     email: `user@example.com`,
-    name: provider === 'google' ? 'Google User' : 'GitHub User',
+    name: provider === 'google' ? 'Google User' : provider === 'github' ? 'GitHub User' : 'Apple User',
     avatar: undefined,
     provider: provider,
   };
@@ -218,6 +218,21 @@ async function exchangeOAuthCode(provider: 'google' | 'github', code: string): P
   } else if (provider === 'github') {
     // const response = await fetch('https://github.com/login/oauth/access_token', { ... });
     // const userInfo = await fetch('https://api.github.com/user', { ... });
+  } else if (provider === 'apple') {
+    // Apple requires JWT verification and POST request to token endpoint
+    // const jwt = generateAppleJWT(); // Generate JWT with private key
+    // const response = await fetch('https://appleid.apple.com/auth/token', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    //   body: new URLSearchParams({
+    //     client_id: APPLE_CLIENT_ID,
+    //     client_secret: jwt,
+    //     code: code,
+    //     grant_type: 'authorization_code',
+    //     redirect_uri: APPLE_CALLBACK_URL,
+    //   }),
+    // });
+    // const userInfo = await fetch('https://appleid.apple.com/auth/userinfo', { ... });
   }
 
   return mockUser;
@@ -349,14 +364,14 @@ async function handleApiRequest(req: Request, path: string, corsHeaders: Record<
   try {
     // POST /api/auth/callback - Handle OAuth callback
     if (path === '/api/auth/callback' && req.method === 'POST') {
-      const body: OAuthCallbackRequest = await req.json();
-      const { code, state } = body;
+      const body: OAuthCallbackRequest & { provider?: string } = await req.json();
+      const { code, state, provider: providerFromBody } = body;
 
       // Validate state (prevent CSRF)
       // In production, verify state matches what was sent in the OAuth request
 
-      // Determine provider from code or add as parameter
-      const provider: 'google' | 'github' = 'google'; // Simplified for demo
+      // Determine provider from request body or default to google
+      const provider: 'google' | 'github' | 'apple' = (providerFromBody as 'google' | 'github' | 'apple') || 'google';
 
       // Exchange code for user info
       const user = await exchangeOAuthCode(provider, code);
