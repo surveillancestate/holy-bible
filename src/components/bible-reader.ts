@@ -24,13 +24,34 @@ class BibleReaderComponent extends BaseComponent {
     data: null
   };
   private abortController: AbortController | null = null;
+  private fontSize: number = 17;
+  private darkMode: boolean = false;
+  private selectedVerse: string | null = null;
 
   constructor() {
     super();
+    this.loadSettings();
   }
 
   static get observedAttributes(): string[] {
     return ['book', 'chapter'];
+  }
+
+  private loadSettings(): void {
+    const savedFontSize = localStorage.getItem('bible-font-size');
+    const savedDarkMode = localStorage.getItem('bible-dark-mode');
+    
+    if (savedFontSize) {
+      this.fontSize = parseInt(savedFontSize, 10);
+    }
+    if (savedDarkMode === 'true') {
+      this.darkMode = true;
+    }
+  }
+
+  private saveSettings(): void {
+    localStorage.setItem('bible-font-size', this.fontSize.toString());
+    localStorage.setItem('bible-dark-mode', this.darkMode.toString());
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
@@ -104,6 +125,12 @@ class BibleReaderComponent extends BaseComponent {
   }
 
   protected render(): void {
+    const darkBg = this.darkMode ? '#1a202c' : '#ffffff';
+    const darkText = this.darkMode ? '#e2e8f0' : '#1a202c';
+    const darkBorder = this.darkMode ? '#4a5568' : '#e2e8f0';
+    const darkHover = this.darkMode ? '#2d3748' : '#f7fafc';
+    const verseHover = this.darkMode ? '#2d3748' : '#f7fafc';
+
     const styles = `
       <style>
         :host {
@@ -112,6 +139,9 @@ class BibleReaderComponent extends BaseComponent {
           max-width: 800px;
           margin: 0 auto;
           padding: 20px;
+          background: ${darkBg};
+          color: ${darkText};
+          transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .header {
@@ -120,7 +150,7 @@ class BibleReaderComponent extends BaseComponent {
           align-items: center;
           margin-bottom: 24px;
           padding-bottom: 16px;
-          border-bottom: 2px solid #e2e8f0;
+          border-bottom: 2px solid ${darkBorder};
           flex-wrap: wrap;
           gap: 12px;
         }
@@ -140,16 +170,17 @@ class BibleReaderComponent extends BaseComponent {
           padding: 10px 14px;
           font-size: 15px;
           font-family: inherit;
-          border: 1px solid #cbd5e0;
+          border: 1px solid ${this.darkMode ? '#4a5568' : '#cbd5e0'};
           border-radius: 6px;
-          background: white;
+          background: ${darkBg};
+          color: ${darkText};
           cursor: pointer;
           transition: all 0.2s ease;
         }
 
         select:hover, button:hover:not(:disabled) {
-          background: #f7fafc;
-          border-color: #a0aec0;
+          background: ${darkHover};
+          border-color: ${this.darkMode ? '#718096' : '#a0aec0'};
         }
 
         select:focus, button:focus {
@@ -166,7 +197,7 @@ class BibleReaderComponent extends BaseComponent {
         .reference {
           font-size: 22px;
           font-weight: 600;
-          color: #2d3748;
+          color: ${darkText};
           min-width: 200px;
           text-align: center;
         }
@@ -177,24 +208,30 @@ class BibleReaderComponent extends BaseComponent {
 
         .verses {
           line-height: 2;
-          font-size: 17px;
-          color: #1a202c;
+          font-size: ${this.fontSize}px;
+          color: ${darkText};
         }
 
         .verse {
           margin-bottom: 12px;
-          padding: 8px 0;
+          padding: 8px 12px;
           transition: background-color 0.15s ease;
+          border-radius: 4px;
+          cursor: pointer;
         }
 
         .verse:hover {
-          background-color: #f7fafc;
-          border-radius: 4px;
+          background-color: ${verseHover};
+        }
+
+        .verse.selected {
+          background-color: ${this.darkMode ? '#4299e133' : '#dbeafe'};
+          border-left: 3px solid #4299e1;
         }
 
         .verse-number {
           font-weight: 700;
-          color: #718096;
+          color: ${this.darkMode ? '#a0aec0' : '#718096'};
           font-size: 13px;
           vertical-align: super;
           margin-right: 6px;
@@ -211,13 +248,13 @@ class BibleReaderComponent extends BaseComponent {
           align-items: center;
           justify-content: center;
           padding: 60px 20px;
-          color: #718096;
+          color: ${this.darkMode ? '#a0aec0' : '#718096'};
         }
 
         .spinner {
           width: 40px;
           height: 40px;
-          border: 3px solid #e2e8f0;
+          border: 3px solid ${this.darkMode ? '#4a5568' : '#e2e8f0'};
           border-top-color: #4299e1;
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
@@ -234,7 +271,7 @@ class BibleReaderComponent extends BaseComponent {
           align-items: center;
           justify-content: center;
           padding: 40px 20px;
-          color: #e53e3e;
+          color: ${this.darkMode ? '#fc8181' : '#e53e3e'};
           text-align: center;
         }
 
@@ -266,21 +303,71 @@ class BibleReaderComponent extends BaseComponent {
         }
 
         .testament-badge.old {
-          background: #fef3c7;
-          color: #92400e;
+          background: ${this.darkMode ? '#d69e2e' : '#fef3c7'};
+          color: ${this.darkMode ? '#744210' : '#92400e'};
         }
 
         .testament-badge.new {
-          background: #dbeafe;
-          color: #1e40af;
+          background: ${this.darkMode ? '#63b3ed' : '#dbeafe'};
+          color: ${this.darkMode ? '#1a365d' : '#1e40af'};
+        }
+
+        /* Settings controls */
+        .settings-controls {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+        }
+
+        .settings-btn {
+          padding: 8px 12px;
+          font-size: 18px;
+          background: transparent;
+          border: 1px solid ${this.darkMode ? '#4a5568' : '#cbd5e0'};
+          color: ${darkText};
+        }
+
+        .settings-btn:hover {
+          background: ${darkHover};
+        }
+
+        .font-controls {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .font-btn {
+          padding: 6px 10px;
+          font-size: 14px;
+          font-weight: bold;
         }
 
         /* Keyboard navigation hint */
         .keyboard-hint {
           font-size: 12px;
-          color: #a0aec0;
+          color: ${this.darkMode ? '#718096' : '#a0aec0'};
           margin-top: 8px;
           text-align: center;
+        }
+
+        /* Verse action tooltip */
+        .verse-action-tooltip {
+          position: fixed;
+          background: ${this.darkMode ? '#2d3748' : '#1a202c'};
+          color: white;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 13px;
+          z-index: 1000;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          pointer-events: none;
+        }
+
+        .verse-action-tooltip.visible {
+          opacity: 1;
         }
 
         /* Responsive adjustments */
@@ -309,7 +396,7 @@ class BibleReaderComponent extends BaseComponent {
           }
 
           .verses {
-            font-size: 16px;
+            font-size: ${this.fontSize - 1}px;
             line-height: 1.8;
           }
         }
@@ -348,12 +435,22 @@ class BibleReaderComponent extends BaseComponent {
           <button id="next-chapter" ${!this.canGoNext() ? 'disabled' : ''} aria-label="Next chapter">
             Next →
           </button>
+          <div class="settings-controls">
+            <div class="font-controls">
+              <button class="font-btn settings-btn" id="font-decrease" aria-label="Decrease font size">A-</button>
+              <button class="font-btn settings-btn" id="font-increase" aria-label="Increase font size">A+</button>
+            </div>
+            <button class="settings-btn" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+              ${this.darkMode ? '☀️' : '🌙'}
+            </button>
+          </div>
         </div>
       </div>
       <div class="content">
         ${this.renderContent()}
       </div>
-      <p class="keyboard-hint">💡 Tip: Use Left/Right arrow keys to navigate chapters</p>
+      <p class="keyboard-hint">💡 Tip: Use Left/Right arrow keys to navigate chapters • Click verses to select</p>
+      <div class="verse-action-tooltip" id="verse-tooltip"></div>
     `;
 
     this.attachEventListeners();
@@ -383,12 +480,16 @@ class BibleReaderComponent extends BaseComponent {
     if (this.state.data && this.state.data.verses.length > 0) {
       return `
         <div class="verses">
-          ${this.state.data.verses.map(v => `
-            <div class="verse" data-verse="${v.verse}">
+          ${this.state.data.verses.map(v => {
+            const verseKey = `${this.currentBook} ${this.currentChapter}:${v.verse}`;
+            const isSelected = this.selectedVerse === verseKey ? 'selected' : '';
+            return `
+            <div class="verse ${isSelected}" data-verse="${v.verse}" data-reference="${verseKey}">
               <span class="verse-number">${v.verse}</span>
               <span class="verse-text">${this.escapeHtml(v.text)}</span>
             </div>
-          `).join('')}
+          `;
+          }).join('')}
         </div>
       `;
     }
@@ -419,6 +520,9 @@ class BibleReaderComponent extends BaseComponent {
     const prevBtn = this.shadow.querySelector('#prev-chapter') as HTMLButtonElement;
     const nextBtn = this.shadow.querySelector('#next-chapter') as HTMLButtonElement;
     const retryBtn = this.shadow.querySelector('#retry-btn') as HTMLButtonElement;
+    const fontDecreaseBtn = this.shadow.querySelector('#font-decrease') as HTMLButtonElement;
+    const fontIncreaseBtn = this.shadow.querySelector('#font-increase') as HTMLButtonElement;
+    const themeToggleBtn = this.shadow.querySelector('#theme-toggle') as HTMLButtonElement;
 
     if (bookSelect) {
       bookSelect.addEventListener('change', (e) => {
@@ -454,6 +558,50 @@ class BibleReaderComponent extends BaseComponent {
         this.loadChapter();
       });
     }
+
+    if (fontDecreaseBtn) {
+      fontDecreaseBtn.addEventListener('click', () => {
+        this.fontSize = Math.max(12, this.fontSize - 2);
+        this.saveSettings();
+        this.render();
+      });
+    }
+
+    if (fontIncreaseBtn) {
+      fontIncreaseBtn.addEventListener('click', () => {
+        this.fontSize = Math.min(32, this.fontSize + 2);
+        this.saveSettings();
+        this.render();
+      });
+    }
+
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        this.darkMode = !this.darkMode;
+        this.saveSettings();
+        this.render();
+      });
+    }
+
+    // Verse click handling for selection
+    this.shadow.addEventListener('click', (e: Event) => {
+      const target = e.target as HTMLElement;
+      const verseEl = target.closest('.verse') as HTMLElement;
+      
+      if (verseEl) {
+        const reference = verseEl.dataset.reference;
+        if (reference) {
+          this.selectedVerse = reference;
+          this.showTooltip(`Selected ${reference}`, e.clientX, e.clientY);
+          this.render();
+          
+          // Copy to clipboard on double-click
+          verseEl.addEventListener('dblclick', () => {
+            this.copyVerseToClipboard(reference);
+          });
+        }
+      }
+    });
   }
 
   private setupKeyboardNavigation(): void {
@@ -507,6 +655,39 @@ class BibleReaderComponent extends BaseComponent {
     url.searchParams.set('book', book);
     url.searchParams.set('chapter', chapter.toString());
     window.history.pushState({ book, chapter }, '', url.toString());
+  }
+
+  private showTooltip(message: string, x: number, y: number): void {
+    const tooltip = this.shadow.querySelector('#verse-tooltip') as HTMLElement;
+    if (tooltip) {
+      tooltip.textContent = message;
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y - 40}px`;
+      tooltip.classList.add('visible');
+      
+      setTimeout(() => {
+        tooltip.classList.remove('visible');
+      }, 2000);
+    }
+  }
+
+  private async copyVerseToClipboard(reference: string): Promise<void> {
+    if (!this.state.data) return;
+    
+    const verseData = this.state.data.verses.find(v => 
+      `${this.currentBook} ${this.currentChapter}:${v.verse}` === reference
+    );
+    
+    if (verseData) {
+      const text = `${reference} - ${verseData.text}`;
+      try {
+        await navigator.clipboard.writeText(text);
+        this.showTooltip('Copied to clipboard!', window.event?.clientX || 0, window.event?.clientY || 0);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+        this.showTooltip('Failed to copy', window.event?.clientX || 0, window.event?.clientY || 0);
+      }
+    }
   }
 }
 

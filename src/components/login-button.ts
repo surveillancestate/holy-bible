@@ -6,6 +6,9 @@ import type { User } from '../auth/auth-service.js';
 class LoginButtonComponent extends BaseComponent {
   private authService: AuthService;
   private user: User | null = null;
+  private isLoading: boolean = false;
+  private error: string | null = null;
+  private authSyncInterval: number | null = null;
 
   constructor() {
     super();
@@ -14,6 +17,40 @@ class LoginButtonComponent extends BaseComponent {
 
   protected onConnect(): void {
     this.user = this.authService.getCurrentUser();
+    this.startAuthSync();
+    
+    // Listen for storage events (cross-tab sync)
+    window.addEventListener('storage', this.handleStorageChange.bind(this));
+  }
+
+  protected onDisconnect(): void {
+    this.stopAuthSync();
+    window.removeEventListener('storage', this.handleStorageChange.bind(this));
+  }
+
+  private startAuthSync(): void {
+    // Check for auth changes every 5 seconds
+    this.authSyncInterval = window.setInterval(() => {
+      const currentUser = this.authService.getCurrentUser();
+      if (JSON.stringify(currentUser) !== JSON.stringify(this.user)) {
+        this.user = currentUser;
+        this.render();
+      }
+    }, 5000);
+  }
+
+  private stopAuthSync(): void {
+    if (this.authSyncInterval !== null) {
+      clearInterval(this.authSyncInterval);
+      this.authSyncInterval = null;
+    }
+  }
+
+  private handleStorageChange(e: StorageEvent): void {
+    if (e.key === 'auth_token' || e.key === 'auth_user') {
+      this.user = this.authService.getCurrentUser();
+      this.render();
+    }
   }
 
   protected render(): void {
