@@ -6,7 +6,7 @@ interface User {
   email: string;
   name: string;
   avatar?: string;
-  provider: "google" | "github" | "local";
+  provider: "google" | "github" | "apple" | "local";
 }
 
 interface AuthState {
@@ -33,22 +33,41 @@ class AuthService {
   }
 
   // Generate OAuth authorization URL
-  getOAuthUrl(provider: "google" | "github"): string {
-    const baseUrl = provider === "google" 
-      ? "https://accounts.google.com/o/oauth2/v2/auth"
-      : "https://github.com/login/oauth/authorize";
+  getOAuthUrl(provider: "google" | "github" | "apple"): string {
+    const baseUrl = this.getBaseUrl(provider);
     
     const params = new URLSearchParams({
       client_id: this.getClientId(provider),
       redirect_uri: `${window.location.origin}/auth/callback`,
       response_type: "code",
-      scope: provider === "google" 
-        ? "openid email profile" 
-        : "user:email",
+      scope: this.getScope(provider),
       state: this.generateState(),
     });
 
+    // Apple-specific parameters
+    if (provider === "apple") {
+      params.append("response_mode", "form_post");
+    }
+
     return `${baseUrl}?${params.toString()}`;
+  }
+
+  private getBaseUrl(provider: string): string {
+    const urls: Record<string, string> = {
+      google: "https://accounts.google.com/o/oauth2/v2/auth",
+      github: "https://github.com/login/oauth/authorize",
+      apple: "https://appleid.apple.com/auth/authorize",
+    };
+    return urls[provider];
+  }
+
+  private getScope(provider: string): string {
+    const scopes: Record<string, string> = {
+      google: "openid email profile",
+      github: "user:email",
+      apple: "name email",
+    };
+    return scopes[provider];
   }
 
   private getClientId(provider: string): string {
@@ -56,6 +75,7 @@ class AuthService {
     const ids: Record<string, string> = {
       google: Bun.env.GOOGLE_CLIENT_ID || "",
       github: Bun.env.GITHUB_CLIENT_ID || "",
+      apple: Bun.env.APPLE_CLIENT_ID || "",
     };
     return ids[provider];
   }

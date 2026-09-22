@@ -128,6 +128,12 @@ class LoginButtonComponent extends BaseComponent {
           border-color: #333;
         }
 
+        .oauth-btn.apple {
+          background: #000;
+          color: white;
+          border-color: #000;
+        }
+
         .user-info {
           display: flex;
           align-items: center;
@@ -186,6 +192,12 @@ class LoginButtonComponent extends BaseComponent {
               </svg>
               GitHub
             </button>
+            <button class="oauth-btn apple" id="apple-login">
+              <svg width="18" height="18" viewBox="0 0 18 18">
+                <path fill="currentColor" d="M16.365 13.468c-.086 1.018-1.52 6.06-3.75 6.06-1.086 0-1.925-.653-3.01-.653-1.12 0-1.96.636-2.99.67-2.32.085-5.346-5.957-5.466-9.526-.085-4.026 2.32-5.97 4.535-6.042 1.085-.035 2.102.756 2.925.756.822 0 2.088-.827 3.373-.72 1.016.05 2.655.426 3.62 1.835-3.196 1.735-2.67 6.515.653 7.865-.05.142-.106.284-.156.426-.249.688-.52 1.366-.823 2.02zm-3.49-9.62c.555-.688.93-1.65.823-2.6-.894.035-1.98.595-2.62 1.347-.57.653-1.065 1.7-93 2.55.98.07 2.015-.596 2.616-1.297h-.82z"/>
+              </svg>
+              Apple
+            </button>
           </div>
         </div>
       `;
@@ -197,6 +209,7 @@ class LoginButtonComponent extends BaseComponent {
   private attachEventListeners(): void {
     const googleBtn = this.querySelector('#google-login');
     const githubBtn = this.querySelector('#github-login');
+    const appleBtn = this.querySelector('#apple-login');
     const logoutBtn = this.querySelector('#logout-btn');
 
     if (googleBtn) {
@@ -207,12 +220,16 @@ class LoginButtonComponent extends BaseComponent {
       githubBtn.addEventListener('click', () => this.handleOAuthLogin('github'));
     }
 
+    if (appleBtn) {
+      appleBtn.addEventListener('click', () => this.handleOAuthLogin('apple'));
+    }
+
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => this.handleLogout());
     }
   }
 
-  private handleOAuthLogin(provider: 'google' | 'github'): void {
+  private handleOAuthLogin(provider: 'google' | 'github' | 'apple'): void {
     const url = this.authService.getOAuthUrl(provider);
     window.location.href = url;
   }
