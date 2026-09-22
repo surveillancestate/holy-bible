@@ -1,17 +1,21 @@
 {
   "name": "kjv-bible-app",
   "version": "1.0.0",
-  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
   "private": true,
   "scripts": {
     "dev": "bun run --watch src/server.ts",
     "start": "bun run src/server.ts",
     "build": "bun build src/server.ts --outdir dist --target bun"
   },
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
+  "type": "module",
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "postgres": "^3.4.9"
   }
 }
