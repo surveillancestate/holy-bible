@@ -1,4 +1,16 @@
-// Base Web Component Class
+/**
+ * Base Web Component Class
+ * 
+ * Provides a foundation for all custom web components in the KJV Bible app.
+ * Features:
+ * - Shadow DOM encapsulation
+ * - Lifecycle management (connected/disconnected)
+ * - Type-safe query selectors
+ * - Custom event dispatching
+ * 
+ * @abstract
+ * @extends HTMLElement
+ */
 abstract class BaseComponent extends HTMLElement {
   protected shadow: ShadowRoot;
   private _connected = false;

@@ -9,6 +9,7 @@
   <script type="module" src="/src/components/base-component.ts"></script>
   <script type="module" src="/src/components/bible-reader.ts"></script>
   <script type="module" src="/src/components/login-button.ts"></script>
+  <script type="module" src="/src/components/table-of-contents.ts"></script>
 </head>
 <body>
   <header class="header">
@@ -23,9 +24,7 @@
 
   <main>
     <div class="container">
-      <h1 class="text-center mb-4">King James Version Bible</h1>
-      
-      <bible-reader book="Genesis" chapter="1"></bible-reader>
+      <table-of-contents></table-of-contents>
       
       <section class="mt-4">
         <h2 class="mb-2">About the KJV</h2>
@@ -35,7 +34,7 @@
         </p>
         <p class="mt-2">
           This application provides a clean, modern interface for reading the timeless words of the King James Bible. 
-          Navigate through books and chapters using the reader above.
+          Click on any book above to start reading, or use the search to find a specific book.
         </p>
       </section>
 
@@ -45,7 +44,7 @@
           <li>📖 All 66 books of the Bible (39 Old Testament, 27 New Testament)</li>
           <li>🔍 Easy navigation between books and chapters</li>
           <li>💾 Bookmark your favorite verses (requires login)</li>
-          <li>🌙 Dark mode support (coming soon)</li>
+          <li>🌙 Dark mode support</li>
           <li>📱 Responsive design for mobile devices</li>
           <li>🔐 OAuth authentication via Google or GitHub</li>
         </ul>
@@ -70,6 +69,37 @@
     // Check authentication status on page load
     document.addEventListener('DOMContentLoaded', () => {
       console.log('KJV Bible App loaded');
+      
+      // Handle URL parameters for direct book access
+      const urlParams = new URLSearchParams(window.location.search);
+      const bookParam = urlParams.get('book');
+      const chapterParam = urlParams.get('chapter');
+      
+      if (bookParam) {
+        // If book parameter is present, show the bible reader instead of TOC
+        const tocElement = document.querySelector('table-of-contents');
+        if (tocElement) {
+          tocElement.style.display = 'none';
+          
+          // Create and insert bible reader
+          const bibleReader = document.createElement('bible-reader');
+          bibleReader.setAttribute('book', bookParam);
+          bibleReader.setAttribute('chapter', chapterParam || '1');
+          
+          const mainContainer = document.querySelector('.container');
+          const aboutSection = mainContainer?.querySelector('section.mt-4');
+          if (aboutSection && mainContainer) {
+            mainContainer.insertBefore(bibleReader, aboutSection);
+            
+            // Add back button
+            const backBtn = document.createElement('button');
+            backBtn.textContent = '← Back to Table of Contents';
+            backBtn.style.cssText = 'margin-bottom: 20px; padding: 10px 20px; font-size: 14px; cursor: pointer; background: #4299e1; color: white; border: none; border-radius: 6px;';
+            backBtn.onclick = () => window.location.href = '/';
+            bibleReader.parentNode?.insertBefore(backBtn, bibleReader);
+          }
+        }
+      }
     });
 
     // Listen for logout events

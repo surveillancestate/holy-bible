@@ -1,6 +1,21 @@
-// KJV Bible API Server with Bun
+/**
+ * KJV Bible API Server with Bun
+ * 
+ * A lightweight, modern Bible reading application built with:
+ * - Bun runtime for fast performance
+ * - Web Components for modular UI
+ * - TypeScript for type safety
+ * - King James Version (public domain)
+ * 
+ * @module server
+ */
+
 import { serve } from 'bun';
 import { KJV_BOOKS, getBookByName, isValidChapter } from './data/kjv-books.js';
+
+// ============================================================================
+// Type Definitions
+// ============================================================================
 
 interface OAuthCallbackRequest {
   code: string;
@@ -28,7 +43,10 @@ interface BibleChapter {
   verses: BibleVerse[];
 }
 
-// Mock user database (replace with real database in production)
+// ============================================================================
+// Mock Database (Replace with real DB in production)
+// ============================================================================
+
 const users = new Map<string, User>();
 const tokens = new Map<string, string>();
 
@@ -153,7 +171,16 @@ const BIBLE_TEXT: Record<string, Record<number, string[]>> = {
   }
 };
 
-// Generate a simple JWT-like token (use proper JWT library in production)
+/**
+ * Generate a simple JWT-like token
+ * 
+ * ⚠️ SECURITY WARNING: This is a mock implementation for development only.
+ * In production, use a proper JWT library (e.g., jsonwebtoken) with secure
+ * signing algorithms and secret management.
+ * 
+ * @param userId - The user ID to encode in the token
+ * @returns A base64-encoded token string
+ */
 function generateToken(userId: string): string {
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
   const payload = Buffer.from(JSON.stringify({ userId, iat: Date.now() })).toString('base64');
@@ -161,14 +188,21 @@ function generateToken(userId: string): string {
   return `${header}.${payload}.${signature}`;
 }
 
-// Exchange OAuth code for user info (mock implementation)
+/**
+ * Exchange OAuth code for user info
+ * 
+ * ⚠️ MOCK IMPLEMENTATION: This is a placeholder for development.
+ * In production, implement the full OAuth flow:
+ * 1. Send the code to the provider's token endpoint
+ * 2. Get the access token
+ * 3. Use the access token to fetch user info from the provider's API
+ * 
+ * @param provider - The OAuth provider ('google' or 'github')
+ * @param code - The authorization code from the provider
+ * @returns A User object
+ */
 async function exchangeOAuthCode(provider: 'google' | 'github', code: string): Promise<User> {
-  // In production, you would:
-  // 1. Send the code to the provider's token endpoint
-  // 2. Get the access token
-  // 3. Use the access token to fetch user info
-  
-  // Mock implementation
+  // Mock implementation - replace with real OAuth flow in production
   const mockUser: User = {
     id: `user_${Date.now()}`,
     email: `user@example.com`,
@@ -177,7 +211,7 @@ async function exchangeOAuthCode(provider: 'google' | 'github', code: string): P
     provider: provider,
   };
 
-  // In production, fetch real user data from provider
+  // TODO: Implement real OAuth token exchange
   if (provider === 'google') {
     // const response = await fetch('https://oauth2.googleapis.com/token', { ... });
     // const userInfo = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', { ... });
@@ -189,7 +223,13 @@ async function exchangeOAuthCode(provider: 'google' | 'github', code: string): P
   return mockUser;
 }
 
-// Get Bible chapter from data store
+/**
+ * Get Bible chapter from data store
+ * 
+ * @param bookName - The name of the Bible book
+ * @param chapter - The chapter number
+ * @returns BibleChapter object or null if not found
+ */
 function getBibleChapter(bookName: string, chapter: number): BibleChapter | null {
   const bookData = BIBLE_TEXT[bookName];
   if (!bookData) {
@@ -213,9 +253,21 @@ function getBibleChapter(bookName: string, chapter: number): BibleChapter | null
   };
 }
 
+/**
+ * Start the Bun HTTP server
+ * 
+ * Configures routes for:
+ * - Static file serving (HTML, CSS, TS/JS)
+ * - API endpoints (/api/*)
+ * - CORS support
+ * - SPA routing fallback
+ */
 const server = serve({
   port: Bun.env.PORT || 3000,
   
+  /**
+   * Main request handler
+   */
   async fetch(req: Request): Promise<Response> {
     const url = new URL(req.url);
     const path = url.pathname;
@@ -256,10 +308,10 @@ const server = serve({
       }
     }
 
-    // Serve TypeScript/JavaScript files
+    // Serve TypeScript/JavaScript files (serve .ts directly, Bun handles transpilation)
     if (path.startsWith('/src/components/') || path.startsWith('/src/data/') || path.startsWith('/src/auth/')) {
       try {
-        const file = Bun.file(`.${path.replace('.ts', '.js')}`);
+        const file = Bun.file(`.${path}`);
         return new Response(file, {
           headers: { 'Content-Type': 'application/javascript' },
         });
@@ -285,6 +337,14 @@ const server = serve({
   },
 });
 
+/**
+ * Handle API requests
+ * 
+ * Routes:
+ * - POST /api/auth/callback - OAuth callback handler
+ * - GET  /api/user/me - Get current user
+ * - GET  /api/bible/:book/:chapter - Get Bible chapter
+ */
 async function handleApiRequest(req: Request, path: string, corsHeaders: Record<string, string>): Promise<Response> {
   try {
     // POST /api/auth/callback - Handle OAuth callback
@@ -369,4 +429,5 @@ async function handleApiRequest(req: Request, path: string, corsHeaders: Record<
   }
 }
 
+// Start the server
 console.log(`📖 KJV Bible server running at http://localhost:${server.port}`);
