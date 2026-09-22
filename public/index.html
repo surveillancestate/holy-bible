@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KJV Bible - King James Version</title>
+  <meta name="description" content="Read the King James Version (KJV) Bible online. Public domain scripture with navigation by book and chapter.">
+  <link rel="stylesheet" href="/src/styles/main.css">
+  <script type="module" src="/src/components/base-component.ts"></script>
+  <script type="module" src="/src/components/bible-reader.ts"></script>
+  <script type="module" src="/src/components/login-button.ts"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <a href="/" class="logo">
+        <span class="logo-icon">📖</span>
+        <span>KJV Bible</span>
+      </a>
+      <login-button></login-button>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1 class="text-center mb-4">King James Version Bible</h1>
+      
+      <bible-reader book="Genesis" chapter="1"></bible-reader>
+      
+      <section class="mt-4">
+        <h2 class="mb-2">About the KJV</h2>
+        <p>
+          The King James Version (KJV), also known as the Authorized Version (AV), is an English translation of the Christian Bible for the Church of England. 
+          It was commissioned in 1604 and published in 1611. The KJV is in the public domain in most countries, making it freely available for use and distribution.
+        </p>
+        <p class="mt-2">
+          This application provides a clean, modern interface for reading the timeless words of the King James Bible. 
+          Navigate through books and chapters using the reader above.
+        </p>
+      </section>
+
+      <section class="mt-4">
+        <h2 class="mb-2">Features</h2>
+        <ul style="list-style-position: inside; line-height: 2;">
+          <li>📖 All 66 books of the Bible (39 Old Testament, 27 New Testament)</li>
+          <li>🔍 Easy navigation between books and chapters</li>
+          <li>💾 Bookmark your favorite verses (requires login)</li>
+          <li>🌙 Dark mode support (coming soon)</li>
+          <li>📱 Responsive design for mobile devices</li>
+          <li>🔐 OAuth authentication via Google or GitHub</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <p>KJV Bible App - Built with pure TypeScript, Bun, and Web Components</p>
+      <div class="footer-links">
+        <a href="/about">About</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="/contact">Contact</a>
+      </div>
+      <p class="copyright">&copy; 2025 KJV Bible App. The King James Version is in the public domain.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Check authentication status on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('KJV Bible App loaded');
+    });
+
+    // Listen for logout events
+    document.addEventListener('logout', () => {
+      console.log('User logged out');
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>
