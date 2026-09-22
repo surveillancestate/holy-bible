@@ -1,3 +1,39 @@
-Since the only file change is the addition of `.gitignore` itself and there are no other file changes provided in the list, there are no build artifacts, dependencies, or temporary files to ignore. The input shows only the `.gitignore` file being added with no other source or artifact files mentioned.
+```ts
+// Compiled and build artifacts
+*.js.map
+*.tsbuildinfo
+dist/
+build/
+coverage/
 
-(empty)
+// Dependencies
+node_modules/
+.npm/
+.yarn/
+
+// Logs and temp files
+*.log
+*.tmp
+*.swp
+
+// Environment
+.env
+.env.local
+*.env.*
+
+// Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+// OS
+.DS_Store
+Thumbs.db
+
+// Testing
+.nyc_output/
+coverage/
+junit.xml
+*.lcov
+```
